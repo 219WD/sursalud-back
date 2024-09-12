@@ -2,9 +2,10 @@ const { validationResult } = require('express-validator');
 const Turno = require('../model/turno');
 const Paciente = require('../model/paciente');
 const Especialista = require('../model/especialista');
+const turno = require('../model/turno');
 
 const createTurno = async (req, res) => {
-    const { turno, paciente, fecha, descripcion, especialista } = req.body;
+    const { paciente, fecha, descripcion, especialista } = req.body;
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -26,7 +27,6 @@ const createTurno = async (req, res) => {
 
         // Crear el nuevo turno
         const newTurno = new Turno({
-            turno,
             paciente: pacienteRecord._id,
             fecha: new Date(fecha), // Almacenar la fecha como Date
             descripcion,
@@ -49,7 +49,9 @@ const createTurno = async (req, res) => {
 
 const findAllTurnos = async (req, res) => {
     try {
-        const turnos = await Turno.find().populate('paciente');
+        const turnos = await Turno.find()
+        .populate('paciente')
+        .populate('especialista');
         res.json({ message: "Buscar todos los turnos", data: turnos });
     } catch (error) {
         res.status(500).send('Error al obtener los turnos');
@@ -58,7 +60,9 @@ const findAllTurnos = async (req, res) => {
 
 const findTurnoById = async (req, res) => {
     try {
-        const turno = await Turno.findById(req.params.id).populate('paciente');
+        const turno = await Turno.findById(req.params.id)
+        .populate('paciente')
+        .populate('especialista');
 
         if (!turno) {
             return res.status(404).json({ message: "Turno no encontrado" });
@@ -70,14 +74,57 @@ const findTurnoById = async (req, res) => {
     }
 };
 
+// Controlador para búsqueda de turnos
+const searchTurnos = async (req, res) => {
+    const { query } = req.query; // Eliminar `activo` de los parámetros
+
+    try {
+        if (!query) {
+            return res.status(400).json({ message: 'Debe proporcionar un término de búsqueda.' });
+        }
+
+        // Buscar pacientes y especialistas que coincidan con el término de búsqueda
+        const pacientes = await Paciente.find({ nombre: { $regex: query.toString(), $options: 'i' } });
+        const especialistas = await Especialista.find({ nombre: { $regex: query.toString(), $options: 'i' } });
+
+        // Obtener los IDs de pacientes y especialistas
+        const pacienteIds = pacientes.map(paciente => paciente._id);
+        const especialistaIds = especialistas.map(especialista => especialista._id);
+
+        // Construir el criterio de búsqueda
+        const searchCriteria = {
+            $or: [
+                { paciente: { $in: pacienteIds } },
+                { especialista: { $in: especialistaIds } }
+            ]
+        };
+
+        const turnos = await Turno.find(searchCriteria)
+            .populate('paciente')
+            .populate('especialista');
+
+        if (turnos.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron turnos.' });
+        }
+
+        res.json(turnos);
+    } catch (error) {
+        console.error('Error al buscar los turnos:', error);
+        res.status(500).json({ message: 'Error al buscar turnos', error });
+    }
+};
+
+
+
 const updateTurnoById = async (req, res) => {
     try {
-        const { turno, paciente, fecha, descripcion } = req.body;
+        const { paciente, fecha, descripcion, especialista } = req.body;
         const updatedTurno = await Turno.findByIdAndUpdate(
             req.params.id,
-            { turno, paciente, fecha, descripcion },
+            { paciente, fecha, descripcion, especialista },
             { new: true }
-        ).populate('paciente');
+        ).populate('paciente')
+        .populate('especialista');
 
         if (!updatedTurno) {
             return res.status(404).json({ message: "Turno no encontrado" });
@@ -105,18 +152,37 @@ const deleteTurnoById = async (req, res) => {
 
 const toggleTurnoStatus = async (req, res) => {
     try {
+      const turno = await Turno.findById(req.params.id);
+  
+      if (!turno) {
+        return res.status(404).json({ message: "Turno no encontrado" });
+      }
+  
+      turno.turno = !turno.turno; // Cambia el estado de turno
+      await turno.save();
+  
+      res.json({ message: `Estado del turno cambiado a: ${turno.turno ? 'true' : 'false'}` });
+    } catch (error) {
+      console.error('Error al cambiar el estado del turno:', error); // Log detallado del error
+      res.status(500).json({ message: 'Error al cambiar el estado del turno', error: error.message });
+    }
+  };  
+
+
+const toggleTurnoStatusActivo = async (req, res) => {
+    try {
         const turno = await Turno.findById(req.params.id);
 
         if (!turno) {
             return res.status(404).json({ message: "Turno no encontrado" });
         }
 
-        turno.turno = !turno.turno; // Cambia el estado de turno a lo opuesto
+        turno.activo = !turno.activo; // Cambia el estado de activo a lo false
         await turno.save();
 
-        res.json({ message: `Turno ${turno.turno ? 'activado' : 'desactivado'}` });
+        res.json({ message: `Turno ${turno.activo ? 'activo' : 'inactivo'}` });
     } catch (error) {
-        res.status(500).send('Error al cambiar el estado del turno');
+        res.status(500).send('Error al cambiar el estado activo del turno');
     }
 };
 
@@ -124,7 +190,9 @@ module.exports = {
     createTurno,
     findAllTurnos,
     findTurnoById,
+    searchTurnos,
     updateTurnoById,
     deleteTurnoById,
-    toggleTurnoStatus
+    toggleTurnoStatus,
+    toggleTurnoStatusActivo
 };

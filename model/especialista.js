@@ -5,6 +5,14 @@ const EspecialistaSchema = new Schema({
     nombre: {
         type: String,
         required: true
+    },
+    especialidad: {
+        type: String,
+        required: true
+    },
+    activo: {
+        type: Boolean,
+        default: true  
     }
 })
 

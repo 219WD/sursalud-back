@@ -4,6 +4,10 @@ const Schema = mongoose.Schema;
 const TurnoSchema = new Schema({
     turno: {
         type: Boolean,
+        default: false
+    },
+    activo: {
+        type: Boolean,
         default: true
     },
     paciente: {

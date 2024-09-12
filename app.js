@@ -7,15 +7,19 @@ const pacienteRouter = require('./routes/paciente.route');
 const antecedentesRoutes = require('./routes/antecedentes.route');
 const turnoRouter = require('./routes/turno.route');
 const odontogramaRouter = require('./routes/odontograma.route');
-const especialistaRoutes = require('./routes/especialista.route');
+const especialistaRouter = require('./routes/especialista.route');
 
 require('dotenv').config();
 require('./auth/auth');
 
-mongoose.connect(process.env.MONGO_URI, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-});
+// mongoose.connect(process.env.MONGO_URI, {
+//     useUnifiedTopology: true,
+//     useNewUrlParser: true,
+// });
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('Failed to connect to MongoDB', err));
 
 const app = express();
 
@@ -35,7 +39,7 @@ app.use('/pacientes', pacienteRouter);
 app.use('/antecedentes', antecedentesRoutes);
 app.use('/turnos', turnoRouter);
 app.use('/odontograma', odontogramaRouter);
-app.use('/especialista', especialistaRoutes);
+app.use('/especialista', especialistaRouter);
 
 const PORT = process.env.PORT || 3000;
 

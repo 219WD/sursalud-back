@@ -2,14 +2,14 @@ const Especialista = require('../model/especialista');
 
 // Crear un nuevo especialista
 const createEspecialista = async (req, res) => {
-    const { nombre } = req.body;
+    const { nombre, especialidad } = req.body;
 
     if (!nombre) {
         return res.status(400).json({ message: 'El nombre del especialista es requerido' });
     }
 
     try {
-        const newEspecialista = new Especialista({ nombre });
+        const newEspecialista = new Especialista({ nombre, especialidad });
         const savedEspecialista = await newEspecialista.save();
         res.status(201).json({ message: 'Especialista creado con éxito', data: savedEspecialista });
     } catch (error) {
@@ -46,13 +46,14 @@ const getEspecialistaById = async (req, res) => {
 const updateEspecialista = async (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
+    const { especialidad } = req.body;
 
     if (!nombre) {
         return res.status(400).json({ message: 'El nombre del especialista es requerido' });
     }
 
     try {
-        const updatedEspecialista = await Especialista.findByIdAndUpdate(id, { nombre }, { new: true });
+        const updatedEspecialista = await Especialista.findByIdAndUpdate(id, { nombre, especialidad }, { new: true });
         if (!updatedEspecialista) {
             return res.status(404).json({ message: 'Especialista no encontrado' });
         }
@@ -77,10 +78,25 @@ const deleteEspecialista = async (req, res) => {
     }
 };
 
+const toggleEspecialistaStatus = async (req, res) => {
+    const especialista = await Especialista.findById(req.params.id);
+
+    if (especialista === null) {
+        res.status(404);
+        return res.json({ message: "Especialista no encontrado" });
+    }
+
+    especialista.activo = !especialista.activo; // Cambia el estado de activo a lo opuesto
+    await especialista.save();
+
+    res.json({ message: `Especialista ${especialista.activo ? 'activado' : 'desactivado'}` });
+};
+
 module.exports = {
     createEspecialista,
     getEspecialistas,
     getEspecialistaById,
     updateEspecialista,
-    deleteEspecialista
+    deleteEspecialista,
+    toggleEspecialistaStatus
 };

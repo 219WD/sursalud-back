@@ -8,7 +8,7 @@ const PacienteSchema = new Schema({
     },
     dni: {
         type: String,
-        required: true
+        required: true,
     },
     domicilio: {
         type: String,

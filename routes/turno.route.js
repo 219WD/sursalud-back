@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const Turno = require("../model/turno");
-const { createTurno, findAllTurnos, findTurnoById, updateTurnoById, deleteTurnoById, toggleTurnoStatus } = require("../controllers/turno.controller");
+const { createTurno, findAllTurnos, findTurnoById, updateTurnoById, deleteTurnoById, toggleTurnoStatus, searchTurnos, toggleTurnoStatusActivo } = require("../controllers/turno.controller");
 const { body, param } = require('express-validator');
 const { expressValidations } = require('../middlewares/expressValidations');
 const verifyJWT = require('../middlewares/verifyJWT');
@@ -9,7 +9,6 @@ const turnoRouter = Router();
 
 // Crear
 turnoRouter.post("/createTurno", [
-    body("turno", "Debe enviar un estado de turno (true o false)").isBoolean(),
     body("paciente", "Debe enviar un Id de paciente válido").isMongoId(),
     body("fecha", "Debe mandar una fecha válida").notEmpty().isISO8601().toDate(),
     body("descripcion", "Debe mandar una descripción").optional().isString(),
@@ -30,6 +29,10 @@ turnoRouter.get("/findATurnoById/:id", [
     expressValidations,
     findTurnoById
 );
+
+
+// Ruta para búsqueda de pacientes
+turnoRouter.get('/search', searchTurnos);
 
 // Cantidad de turnos del dia
 turnoRouter.get('/today', async (req, res) => {
@@ -91,6 +94,14 @@ turnoRouter.patch('/:id/toggle-status', [
 ],
     expressValidations,
     toggleTurnoStatus
+);
+
+// Toggle estado turno activo/inactivo (delete)
+turnoRouter.patch('/:id/toggle-status-activo', [
+    param("id", "Debe enviar un Id válido").isMongoId()
+],
+    expressValidations,
+    toggleTurnoStatusActivo
 );
 
 module.exports = turnoRouter;
