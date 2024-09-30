@@ -24,7 +24,8 @@ app.use(bodyParser.json());
 
 // Configuración de CORS
 app.use(cors({
-    origin: 'http://localhost:5173', // Permitir que este origen acceda a tu backend
+  origin: 'https://sursalud-oz3p4trth-219wds-projects.vercel.app/', 
+  // origin: 'http://localhost:5173', 
     credentials: true
 }));
 
