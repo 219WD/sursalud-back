@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 
 // Configuración de CORS
 app.use(cors({
-  origin: 'https://sursalud-219wds-projects.vercel.app/', 
+  origin: 'https://sursalud-frontend.vercel.app/', 
   // origin: 'http://localhost:5173', 
     credentials: true
 }));
