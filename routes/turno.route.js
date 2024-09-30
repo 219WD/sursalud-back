@@ -12,7 +12,8 @@ turnoRouter.post("/createTurno", [
     body("paciente", "Debe enviar un Id de paciente válido").isMongoId(),
     body("fecha", "Debe mandar una fecha válida").notEmpty().isISO8601().toDate(),
     body("descripcion", "Debe mandar una descripción").optional().isString(),
-    body("especialista", "Debe enviar un Id de especialista válido").isMongoId()
+    body("especialista", "Debe enviar un Id de especialista válido").isMongoId(),
+    body("precio", "Debe mandar un precio").optional().isString(),
 ],
     verifyJWT,
     expressValidations,
@@ -74,7 +75,8 @@ turnoRouter.get('/monthly', async (req, res) => {
 turnoRouter.put("/updateTurnoById/:id", [
     param("id", "Debe enviar un Id válido").isMongoId(),
     body("turno", "Debe enviar un estado de turno (true o false)").isBoolean(),
-    body("paciente", "Debe enviar un Id de paciente válido").isMongoId()
+    body("paciente", "Debe enviar un Id de paciente válido").isMongoId(),
+    body("precio", "Debe mandar un precio").optional().isString()
 ],
     expressValidations,
     updateTurnoById
@@ -88,7 +90,7 @@ turnoRouter.delete("/deleteTurnoById/:id", verifyJWT, [
     deleteTurnoById
 );
 
-// Toggle estado
+// Toggle subir a sala de espera
 turnoRouter.patch('/:id/toggle-status', [
     param("id", "Debe enviar un Id válido").isMongoId()
 ],

@@ -5,7 +5,7 @@ const Especialista = require('../model/especialista');
 const turno = require('../model/turno');
 
 const createTurno = async (req, res) => {
-    const { paciente, fecha, descripcion, especialista } = req.body;
+    const { paciente, fecha, descripcion, especialista, precio } = req.body;
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -30,7 +30,8 @@ const createTurno = async (req, res) => {
             paciente: pacienteRecord._id,
             fecha: new Date(fecha), // Almacenar la fecha como Date
             descripcion,
-            especialista: especialistaRecord._id
+            especialista: especialistaRecord._id,
+            precio
         });
 
         const savedTurno = await newTurno.save();
@@ -38,7 +39,8 @@ const createTurno = async (req, res) => {
             message: 'Turno creado con éxito',
             data: savedTurno,
             paciente: pacienteRecord,
-            especialista: especialistaRecord
+            especialista: especialistaRecord,
+            precio
         });
     } catch (error) {
         console.error("Error al crear el turno:", error);
@@ -118,10 +120,10 @@ const searchTurnos = async (req, res) => {
 
 const updateTurnoById = async (req, res) => {
     try {
-        const { paciente, fecha, descripcion, especialista } = req.body;
+        const { paciente, fecha, descripcion, especialista, precio } = req.body;
         const updatedTurno = await Turno.findByIdAndUpdate(
             req.params.id,
-            { paciente, fecha, descripcion, especialista },
+            { paciente, fecha, descripcion, especialista, precio },
             { new: true }
         ).populate('paciente')
         .populate('especialista');

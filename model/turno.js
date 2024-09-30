@@ -35,6 +35,10 @@ const TurnoSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Especialista",
         required: true
+    },
+    precio: {
+        type: String,
+        trim: true
     }
 });
 

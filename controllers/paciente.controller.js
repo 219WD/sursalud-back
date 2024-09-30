@@ -3,7 +3,7 @@ const Paciente = require("../model/paciente");
 const Antecedentes = require("../model/antecedentes");
 
 const createPaciente = async (req, res) => {
-    const { nombre, dni, domicilio, telefono, fechaNacimiento, edad, sexo, antecedentes } = req.body;
+    const { nombre, dni, domicilio, telefono, fechaNacimiento, edad, sexo, antecedentes, medicamentos } = req.body;
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -26,7 +26,8 @@ const createPaciente = async (req, res) => {
             fechaNacimiento,
             edad,
             sexo,
-            antecedentes: antecedentesRecord._id
+            antecedentes: antecedentesRecord._id,
+            medicamentos
         });
 
         const savedPaciente = await newPaciente.save();
@@ -121,7 +122,8 @@ const updatePacienteById = async (req, res) => {
         fechaNacimiento: req.body.fechaNacimiento,
         edad: req.body.edad,
         sexo: req.body.sexo,
-        antecedentes: req.body.antecedentes
+        antecedentes: req.body.antecedentes,
+        medicamentos: req.body.medicamentos
     })
 
 

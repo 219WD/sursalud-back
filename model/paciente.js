@@ -38,6 +38,10 @@ const PacienteSchema = new Schema({
     activo: {
         type: Boolean,
         default: true  
+    },
+    medicamentos: {
+        type: String,
+        trim: true
     }
 }, { timestamps: true });
 

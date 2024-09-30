@@ -12,11 +12,6 @@ const especialistaRouter = require('./routes/especialista.route');
 require('dotenv').config();
 require('./auth/auth');
 
-// mongoose.connect(process.env.MONGO_URI, {
-//     useUnifiedTopology: true,
-//     useNewUrlParser: true,
-// });
-
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('Failed to connect to MongoDB', err));

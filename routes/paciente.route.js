@@ -17,7 +17,8 @@ pacienteRouter.post("/createPaciente", [
     body("fechaNacimiento", "Debe mandar una fecha de nacimiento").notEmpty(),
     body("edad", "Debe mandar una edad").notEmpty(),
     body("sexo", "Debe mandar un sexo").notEmpty(),
-    body("antecedentes", "Debe mandar un antecedente medico").notEmpty()
+    body("antecedentes", "Debe mandar un antecedente medico").notEmpty(),
+    body('medicamentos', 'Debe mandar medicamentos').isString().optional()
 ],
     verifyJWT,
     expressValidations,
@@ -76,7 +77,8 @@ pacienteRouter.put("/updatePacienteById/:id", [
     body("fechaNacimiento", "Debe mandar una fecha de nacimiento").isString(),
     body("edad", "Debe mandar una edad").isNumeric(),
     body("sexo", "Debe mandar un sexo").isString(),
-    body("antecedentes", "Debe mandar un antecedente medico").isString()
+    body("antecedentes", "Debe mandar un antecedente medico").isString(),
+    body('medicamentos', 'Debe mandar medicamentos').isString().optional()
 ],
     expressValidations,
     updatePacienteById
