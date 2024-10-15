@@ -3,37 +3,49 @@ const Turno = require("../model/turno");
 const { createTurno, findAllTurnos, findTurnoById, updateTurnoById, deleteTurnoById, toggleTurnoStatus, searchTurnos, toggleTurnoStatusActivo } = require("../controllers/turno.controller");
 const { body, param } = require('express-validator');
 const { expressValidations } = require('../middlewares/expressValidations');
-const verifyJWT = require('../middlewares/verifyJWT');
+const { verifyJWT, verifyRoles } = require('../middlewares/verifyJWT');
+// Definir los roles permitidos
+const adminAndModerator = verifyRoles('admin', 'moderator');
+const adminOnly = verifyRoles('admin');
 
 const turnoRouter = Router();
 
 // Crear
 turnoRouter.post("/createTurno", [
+    verifyJWT,
+    adminAndModerator,
     body("paciente", "Debe enviar un Id de paciente válido").isMongoId(),
     body("fecha", "Debe mandar una fecha válida").notEmpty().isISO8601().toDate(),
     body("descripcion", "Debe mandar una descripción").optional().isString(),
     body("especialista", "Debe enviar un Id de especialista válido").isMongoId(),
     body("precio", "Debe mandar un precio").optional().isString(),
-],
-    verifyJWT,
     expressValidations,
     createTurno
-);
+]);
 
 // Leer todos
-turnoRouter.get("/findAllTurnos", findAllTurnos);
+turnoRouter.get("/findAllTurnos", [
+    verifyJWT,
+    adminAndModerator,
+    findAllTurnos
+]);
 
 // Leer por ID
 turnoRouter.get("/findATurnoById/:id", [
-    param("id", "Debe enviar un Id válido").isMongoId()
-],
+    verifyJWT,
+    adminAndModerator,
+    param("id", "Debe enviar un Id válido").isMongoId(),
     expressValidations,
     findTurnoById
-);
+]);
 
 
 // Ruta para búsqueda de pacientes
-turnoRouter.get('/search', searchTurnos);
+turnoRouter.get('/search', [
+    verifyJWT,
+    adminAndModerator,
+    searchTurnos
+]);
 
 // Cantidad de turnos del dia
 turnoRouter.get('/today', async (req, res) => {
@@ -73,37 +85,41 @@ turnoRouter.get('/monthly', async (req, res) => {
 
 // Actualizar
 turnoRouter.put("/updateTurnoById/:id", [
+    verifyJWT,
+    adminAndModerator,
     param("id", "Debe enviar un Id válido").isMongoId(),
     body("turno", "Debe enviar un estado de turno (true o false)").isBoolean(),
     body("paciente", "Debe enviar un Id de paciente válido").isMongoId(),
-    body("precio", "Debe mandar un precio").optional().isString()
-],
+    body("precio", "Debe mandar un precio").optional().isString(),
     expressValidations,
     updateTurnoById
-);
+]);
 
 // Eliminar
 turnoRouter.delete("/deleteTurnoById/:id", verifyJWT, [
-    param("id", "Debe enviar un Id válido").isMongoId()
-],
+    verifyJWT,
+    adminOnly,
+    param("id", "Debe enviar un Id válido").isMongoId(),
     expressValidations,
     deleteTurnoById
-);
+]);
 
 // Toggle subir a sala de espera
 turnoRouter.patch('/:id/toggle-status', [
-    param("id", "Debe enviar un Id válido").isMongoId()
-],
+    verifyJWT,
+    adminAndModerator,
+    param("id", "Debe enviar un Id válido").isMongoId(),
     expressValidations,
     toggleTurnoStatus
-);
+]);
 
 // Toggle estado turno activo/inactivo (delete)
 turnoRouter.patch('/:id/toggle-status-activo', [
-    param("id", "Debe enviar un Id válido").isMongoId()
-],
+    verifyJWT,
+    adminAndModerator,
+    param("id", "Debe enviar un Id válido").isMongoId(),
     expressValidations,
     toggleTurnoStatusActivo
-);
+]);
 
 module.exports = turnoRouter;

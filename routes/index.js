@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const roleAuthorization = require('../middlewares/roleAuthorization'); 
+const roleAuthorization = require('../middlewares/roleAuthorization');
 const User = require('../model/User');
 
 // Rutas
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
   res.send('Hello World');
 });
 
@@ -20,8 +20,8 @@ router.post('/signup', passport.authenticate('signup', { session: false }), asyn
 router.post('/login', async (req, res, next) => {
   passport.authenticate('login', async (err, user, info) => {
     try {
-      if (err || !user) {
-        console.log(err);
+      if (err != null || !user) {
+        console.log(err, user)
         const error = new Error('new Error');
         return next(error);
       }
@@ -33,16 +33,16 @@ router.post('/login', async (req, res, next) => {
         const token = jwt.sign({ user: body }, process.env.JWT_SECRET, { expiresIn: '3h' });
         return res.json({ token });
       });
-    } catch(e) {
+    } catch (e) {
       return next(e);
     }
   })(req, res, next);
 });
 
 // Ruta para obtener todos los usuarios (solo admin)
-router.get('/users/findAllUsers', 
-  passport.authenticate('jwt', { session: false }), 
-  roleAuthorization(['admin']), 
+router.get('/users/findAllUsers',
+  passport.authenticate('jwt', { session: false }),
+  roleAuthorization(['admin']),
   async (req, res, next) => {
     try {
       const users = await User.find({}, '-password'); // Excluir el campo de contraseña
@@ -55,9 +55,9 @@ router.get('/users/findAllUsers',
 );
 
 // Ruta para promover un usuario a moderador (solo admin)
-router.put('/users/upgradeRole/:userId', 
-  passport.authenticate('jwt', { session: false }), 
-  roleAuthorization(['admin']), 
+router.put('/users/upgradeRole/:userId',
+  passport.authenticate('jwt', { session: false }),
+  roleAuthorization(['admin']),
   async (req, res, next) => {
     const { userId } = req.params;
 
@@ -84,9 +84,9 @@ router.put('/users/upgradeRole/:userId',
 );
 
 // Ruta para eliminar un usuario (solo admin)
-router.delete('/users/deleteUser/:userId', 
-  passport.authenticate('jwt', { session: false }), 
-  roleAuthorization(['admin']), 
+router.delete('/users/deleteUser/:userId',
+  passport.authenticate('jwt', { session: false }),
+  roleAuthorization(['admin']),
   async (req, res, next) => {
     const { userId } = req.params;
 

@@ -1,7 +1,10 @@
 const { Router } = require("express");
 const { body, param } = require('express-validator');
 const { expressValidations } = require('../middlewares/expressValidations');
-const verifyJWT = require('../middlewares/verifyJWT');
+const { verifyJWT, verifyRoles } = require('../middlewares/verifyJWT');
+// Definir los roles permitidos
+const adminAndModerator = verifyRoles('admin', 'moderator');
+const adminOnly = verifyRoles('admin');
 const {
     createOdontograma,
     findAllOdontogramas,
@@ -19,6 +22,7 @@ odontogramaRouter.post("/createOdontograma", [
     body("teeth.*.number", "El número del diente debe ser un número").isNumeric(),
     body("teeth.*.caries", "Las caries deben ser un objeto con booleanos").isObject()
 ],
+    adminAndModerator,
     verifyJWT,
     expressValidations,
     createOdontograma
@@ -43,6 +47,7 @@ odontogramaRouter.put("/updateOdontogramaById/:id", [
     body("teeth.*.number", "El número del diente debe ser un número").isNumeric(),
     body("teeth.*.caries", "Las caries deben ser un objeto con booleanos").isObject()
 ],
+    adminAndModerator,
     expressValidations,
     updateOdontogramaById
 );
@@ -51,6 +56,7 @@ odontogramaRouter.put("/updateOdontogramaById/:id", [
 odontogramaRouter.delete("/deleteOdontogramaById/:id", verifyJWT, [
     param("id", "Debe mandar un Id válido").isMongoId()
 ],
+    adminOnly,
     expressValidations,
     deleteOdontogramaById
 );

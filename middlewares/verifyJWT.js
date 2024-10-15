@@ -12,6 +12,7 @@ const verifyJWT = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('Token decodificado:', decoded); // Agrega esto
         req.user = decoded.user; // Asegúrate de que `decoded.user` existe
         console.log('Usuario autenticado');
         next();
@@ -21,4 +22,14 @@ const verifyJWT = (req, res, next) => {
     }
 };
 
-module.exports = verifyJWT;
+
+const verifyRoles = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Acceso denegado. No tienes los permisos necesarios.' });
+        }
+        next();
+    };
+};
+
+module.exports = {verifyJWT, verifyRoles};
